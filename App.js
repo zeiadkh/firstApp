@@ -1,26 +1,45 @@
 import { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { Button, FlatList, StyleSheet, View } from "react-native";
 import Goal from "./Components/Goal";
-import GoalInput from "./Components/TextInput";
+import GoalInput from "./Components/AddGoal";
 export default function App() {
   const [goals, setGoals] = useState([]);
-
+  const [addGoalVisible, setAddGoalVisible] = useState(false);
+  const addGoallVisibleHandler = () => {
+    setAddGoalVisible(true);
+  };
+  const hideAddGoalHandler = () => {
+    setAddGoalVisible(false);
+  };
   function addGoalHandler(enteredGoalText) {
     setGoals((prevGoals) => [
       ...prevGoals,
       { id: Math.random().toString(), text: enteredGoalText },
     ]);
+    hideAddGoalHandler();
+  }
+  function deleteGoalHandler(id) {
+    setGoals([...goals.filter((goals) => goals.id !== id)]);
   }
   return (
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <GoalInput onAddGoal={addGoalHandler} />
-      </View>
+      <Button title="Add Goal+" onPress={addGoallVisibleHandler}></Button>
+      <GoalInput
+        onAddGoal={addGoalHandler}
+        visible={addGoalVisible}
+        hide={hideAddGoalHandler}
+      />
       <View style={styles.goalList}>
         <FlatList
           data={goals}
           renderItem={(goalData) => {
-            return <Goal text={goalData.item.text} />;
+            return (
+              <Goal
+                text={goalData.item.text}
+                id={goalData.item.id}
+                onDelete={deleteGoalHandler}
+              />
+            );
           }}
           keyExtractor={(item, index) => {
             return item.id;
@@ -37,15 +56,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 16,
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderBottomColor: "#cccccc",
-    borderBottomWidth: 1,
-  },
+
   goalList: {
     flex: 4,
   },
